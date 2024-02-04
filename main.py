@@ -1,8 +1,8 @@
 import pandas as pd
 from introFunc import (
     get_CIF,
-    get_files_csv,
-    get_files_xlsx,
+    get_files,
+    read_file,
     check_same_columns,
     detect_encoding,
 )
@@ -14,12 +14,7 @@ from output import write_to_xlsx
 
 def main():
     cif = get_CIF()
-    files_csv = get_files_csv()
-    if not files_csv:
-        files_xlsx = get_files_xlsx()
-        files = files_xlsx
-    else:
-        files = files_csv
+    files = get_files()
     encodi = detect_encoding(files[0])
     if check_same_columns(files, encodi):
         df = merge_files(files, encodi)
@@ -32,10 +27,7 @@ def main():
 def merge_files(files, encodi):
     # Merge files and drop empty rows and columns, and filter only the desired columns
     # load all files into a list of dataframes
-    if files[0].endswith(".csv"):
-        dfs = [pd.read_csv(file, encoding=encodi, delimiter=";") for file in files]
-    else:
-        dfs = [pd.read_excel(file) for file in files]
+    dfs = [read_file(file, encodi) for file in files]
     # concatenate dataframes
     merged_df = pd.concat(dfs, ignore_index=True)
     # drop rows where Nombre o Razón Social Factura Emisor is empty (these are the rows that contain the totals)

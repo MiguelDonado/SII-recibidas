@@ -4,6 +4,8 @@ from tkinter import simpledialog, messagebox
 import re
 import chardet
 
+NUMBER_OF_COLUMNS_OF_FILE = 178
+
 
 def get_CIF():
     # Ask the user for input (CIF). The pop-up'll only close when a valid CIF is entered.
@@ -25,24 +27,19 @@ def get_CIF():
     return cif
 
 
-def get_files_csv():
-    # Get all csv files from actual directory
+def get_files():
     dir = os.getcwd()
-    files = [
+    if files := [
         os.path.join(dir, file) for file in os.listdir(".") if file.endswith(".csv")
-    ]
-    return files
-
-
-def get_files_xlsx():
-    # Get all xlsx files from actual directory
-    dir = os.getcwd()
-    files = [
-        os.path.join(dir, file)
-        for file in os.listdir(".")
-        if file.endswith(".xlsx") and file != "SII RECIBIDAS PROVEEDORES.xlsx"
-    ]
-    return files
+    ]:
+        return files
+    else:
+        files = [
+            os.path.join(dir, file)
+            for file in os.listdir(".")
+            if file.endswith(".xlsx") and file != "SII RECIBIDAS PROVEEDORES.xlsx"
+        ]
+        return files
 
 
 def detect_encoding(file_path):
@@ -52,30 +49,22 @@ def detect_encoding(file_path):
 
 
 def check_same_columns(files, encodi):
-    if files[0].endswith(".csv"):
-        # Check if all the csv files've the same columns.
-        first_file_columns = None
-        for file in files:
-            # read only the first row
-            df = pd.read_csv(file, encoding=encodi, delimiter=";", nrows=1)
-            if first_file_columns is None:
-                first_file_columns = df.columns
-            elif not df.columns[:178].equals(first_file_columns[:178]):
-                messagebox.showerror(
-                    "ERROR", "Los archivos no tienen las mismas columnas."
-                )
-                exit()
-    else:
-        # Check if all the xlsx files've the same columns.
-        first_file_columns = None
-        for file in files:
-            # read only the first row
-            df = pd.read_excel(file, nrows=1)
-            if first_file_columns is None:
-                first_file_columns = df.columns
-            elif not df.columns[:178].equals(first_file_columns[:178]):
-                messagebox.showerror(
-                    "ERROR", "Los archivos no tienen las mismas columnas."
-                )
-                exit()
+    first_file_columns = None
+    for file in files:
+        df = read_file(file, encodi, 1)
+        if first_file_columns is None:
+            first_file_columns = df.columns
+        elif not df.columns[:NUMBER_OF_COLUMNS_OF_FILE].equals(
+            first_file_columns[:NUMBER_OF_COLUMNS_OF_FILE]
+        ):
+            messagebox.showerror("ERROR", "Los archivos no tienen las mismas columnas.")
+            exit()
     return True
+
+
+def read_file(file, encodi, nrows=None):
+    if file.endswith(".csv"):
+        df = pd.read_csv(file, encoding=encodi, delimiter=";", nrows=nrows)
+    else:
+        df = pd.read_excel(file, nrows=nrows)
+    return df
