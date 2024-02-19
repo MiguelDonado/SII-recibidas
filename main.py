@@ -16,11 +16,11 @@ def main():
     cif = get_CIF()
     files = get_files()
     encodi = detect_encoding(files[0])
-    if check_same_columns(files, encodi):
-        df = merge_files(files, encodi)
-        df = calculate_all_columns(df, cif)
-        df = func_calculate_bases_tipos(df)
-        df = delete_columns(df)
+    # if check_same_columns(files, encodi):
+    df = merge_files(files, encodi)
+    df = calculate_all_columns(df, cif)
+    df = func_calculate_bases_tipos(df)
+    df = delete_columns(df)
     write_to_xlsx(df)
 
 
